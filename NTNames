@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+from subprocess import check_output
+
+hosts_dic = {
+"10.42.1.100\t": "RT",
+"10.42.1.3\t": "Cisco",
+"10.42.1.5\t": "y0lo",
+"10.42.1.10\t": "jaR0",
+"10.42.1.11\t": "Landar0x",
+"10.42.1.12\t": "Knoppix",
+"10.42.1.52\t": "KnopWif",
+"10.42.1.13\t": "m4k",
+"10.42.1.14\t": "muS1x",
+"10.42.1.15\t": "linux-q5vi",
+"10.42.1.16\t": "R3d",
+"10.42.1.17\t": "xXx",
+"10.42.1.18\t": "f3dor",
+"10.42.1.19\t": "Matriux",
+"10.42.1.20\t": "BOX",
+"10.42.1.21\t": "tru30s",
+"10.42.1.22\t": "Spike",
+"10.42.1.23\t": "wifislax",
+"10.42.1.24\t": "LiGhT",
+"10.42.1.25\t": "w1ns3rv",
+"10.42.1.26\t": "srv8e",
+"10.42.1.27\t": "bugtraq",
+"10.42.1.28\t": "N5Tool",
+"10.42.1.29\t": "pentoo",
+"10.42.1.30\t": "BOX",
+"10.42.1.31\t": "fr33bsd",
+"10.42.1.32\t": "parrot",
+"10.42.1.33\t": "Ka0s",
+"10.42.1.34\t": "nSTool",
+"10.42.1.35\t": "minino",
+"10.42.1.37\t": "commando",
+"10.42.1.39\t": "p17",
+"10.42.1.40\t": "",
+"10.42.1.41\t": "blackata",
+"10.42.1.42\t": "E5-771",
+"10.42.1.43\t": "p3r0q",
+"10.42.1.44\t": "Quad",
+"10.42.1.45\t": "QuadWif",
+"10.42.1.53\t": "noleak",
+"10.42.1.69\t": "ryzen",
+"10.42.1.50\t": "n3wbWif",
+"10.42.1.55\t":"precision",
+"10.42.1.56\t":"ath3na",
+}
+
+mac_dic = {
+"00:1e:f6:73:0f:c0":"Cisco",
+"fc:75:16:6e:0b:d2":"m4k",
+"20:cf:30:8c:c2:55":"xXx",
+"00:19:99:05:de:a3":"Matriux",
+"00:1c:7b:a1:24:34":"BOX",
+"00:13:21:f3:15:2e":"jaR0",
+"00:13:72:7c:7c:b1":"Knoppix",
+"00:0c:6e:af:86:27":"R3d",
+"00:90:27:90:e5:17":"f3dor",
+"00:0b:6a:cf:09:82":"linux-q5vi",
+"00:0c:6e:7f:34:62":"Parrot",
+"00:0c:6e:af:86:0d":"w1ns3rv",
+"00:e0:e4:90:e1:5a":"blackata",
+"00:21:97:39:11:48":"tru30s",
+"00:16:17:ec:de:e1":"WIN-12/muS1x",
+"00:1f:16:f4:15:16":"bugtraq-II",
+"00:1b:b9:a4:56:5d":"N5Tool",
+"00:0f:fe:ee:b8:f0":"w7",
+"00:90:f5:c1:7f:8b":"BOX",
+"bc:ee:7b:55:2f:f7":"RT",
+"00:0d:61:b6:35:b6":"pentoo",
+"00:15:f2:33:ff:34":"slax",
+"00:16:ec:9f:76:05":"Landar0x",
+"00:17:31:7a:54:e0":"Spike",
+"54:42:49:2a:5e:83":"nSTool",
+"00:17:31:7a:69:5b":"fr33bsd",
+"00:23:8b:67:7c:62":"LiGhT",
+"00:0f:fe:36:49:1f":"srv8e",
+"00:e0:7d:e2:59:f2":"minino",
+"00:22:64:33:dd:e7":"commando",
+"1c:6f:65:b8:91:0f":"p17",
+"00:19:bb:57:55:39":"",
+"00:11:d8:c4:6c:c6":"y0lo",
+"2c:60:0c:47:e1:c9":"blackata",
+"c4:54:44:c2:0f:90":"E5-771",
+"c8:0a:a9:4a:c6:82":"p3r0q",
+"00:21:97:23:7c:f1":"Quad",
+"00:22:5f:1f:62:2d":"QuadWif",
+"00:22:15:63:cc:24":"noleak",
+"2c:f0:5d:24:f6:60":"ryzen",
+"bc:30:7d:7b:e9:0f":"blackWif",
+"10:1f:74:e4:0e:9b":"n3wb",
+"d0:df:9a:ef:3e:1a":"n3wbWif",
+"7c:dd:90:25:ed:55":"KnopWif",
+"bc:ee:7b:55:2f:f6":"RT_out",
+"3c:a9:f4:74:e4:f8":"precision",
+"bc:30:7d:32:3a:dd":"ath3na",
+}
+
+hosts = check_output(["arp-scan", "-l"])
+print()
+for h in hosts.decode().split('\n')[2:-4]:
+    mac = h.split("\t")[1]
+    for _ in hosts_dic:
+        h = h.replace(_, hosts_dic[_].ljust(21, "\x20"))
+    for m in mac_dic:
+        if mac == m:
+            col = "\033[32m"
+            break
+        else:
+            col = "\033[91m"
+    print(col+h+"\033[0m")
+print()
+
+

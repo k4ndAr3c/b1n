@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+
+#
+# $Id: create_ramdisk4-64.cp,v 1.1 2009/02/17 19:11:44 pblankenbaker Exp $
+
+#
+# Script: create_ramdisk4-64 ---rwh 2003
+#
+# This script will create a 64MB RAM Disk on dev: ${ramDev} at mount point:
+# ${ramMntDir}... 
+#
+
+# **Note: one could set ${1} to be -v for verbose output...
+
+
+#
+# Variables
+# =========
+ramDev=/dev/ram4
+ramMntDir=/mnt/ram4 
+ramDiskSize=64
+
+#
+# Code
+# ====
+/root/bin/create_ramdisk -s ${ramDiskSize} -d ${ramDev} -m ${ramMntDir} ${1}
+
+# terminate cleanly
+exit 0

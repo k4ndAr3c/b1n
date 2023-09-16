@@ -1,0 +1,6 @@
+#!/bin/bash
+
+systemctl restart nfs-config
+systemctl restart rpc-statd
+systemctl restart nfs-server
+

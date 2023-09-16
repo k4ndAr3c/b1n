@@ -1,0 +1,9 @@
+#/bin/bash
+echo '.: HackThisSite :.'
+curl -s 'https://www.hackthissite.org/user/view/k4ndAr3c/' |grep Points |grep Rank |cut -c 5-
+echo -e '\n.: n3wbieContest :.'
+curl -ks 'https://www.newbiecontest.org/index.php?page=info_membre&id=79413' |grep -i classement -B2 |grep Points -A2|cut -d '<' -f 4-5 |grep -v href |sed 's/\/span>//g' |sed 's/<\/p>//g' |sed 's/span class=\"italic\">Position :<//g' |cut -c 2-
+echo -e '\n.: r00t-me :.'
+curl -s 'https://www.root-me.org/k4ndar3c?inc=score&lang=fr' |grep Place -C 10 |grep h3 |grep -Eo ';(.*?)<' |tr -d ";"|tr -d "<"
+echo -e '\n.: Z3nk :.'
+elinks --dump "https://www.zenk-security.com/profil?uid=11453" |grep -A5 Rang | tr -d ' '

@@ -1,0 +1,35 @@
+#!/bin/bash
+hddtemp /dev/sda
+echo
+sleep 1
+sensors
+echo
+sleep 1
+uptime
+echo
+sleep 1
+free -h
+sleep 1
+echo
+echo "dns:"
+grep 'nameserver' /etc/resolv.conf | awk '{print $2}'
+echo
+sleep 1
+echo "dhcp:"
+grep 'dhcp-server' /var/lib/dhcp/dhclient.leases | awk '{print $3}' | cut -d ';' -f1 | head -n1
+echo
+sleep 1
+ifconfig |grep "flag" |grep -v "lo" |cut -f1 -d":"
+echo
+sleep 1
+ifconfig |grep "ether" |awk '{print $2}'
+echo
+sleep 1
+ifconfig |grep "inet"|egrep -ve '(127|::1)'|awk '{print $2}'
+sleep 1
+echo
+df -hT --exclude-type=tmpfs
+echo
+uname -a
+echo
+

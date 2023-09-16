@@ -1,0 +1,87 @@
+#!/usr/bin/bash
+#
+# $Id: prt_unresolved_links.cp,v 1.2 2009/02/24 15:56:06 pblankenbaker Exp $
+#
+# Script: prt_unresolved_links
+#
+# Description: This script searches for any unresolved symbolic links that
+#              point to files or directories that do not exist. The location
+#	       of the unresolved symbolic links will be printed out.
+#
+# Usage: prt_unresolved_links [dir]
+#
+#    dir - optional directory to start search and if not specified
+#          the search will start from "/".
+#
+#   ** Note: The "/proc" directory will not be searched....
+
+# Vars
+# ====
+root_dir=${1:-"/"}
+
+broken_link_cnt=0;
+
+# find_links DIR
+#
+#   Uses the find command to print out symbolic links in or under the
+#   starting directory DIR. However, if DIR is /, the find will exclude
+#   the /proc and /sys directories 
+
+find_links() {
+  declare -r DIR="${1}";
+  local FIND="/usr/bin/find";
+  if [ "${DIR}" != "/" ]; then
+    ${FIND} "${DIR}" -type l;
+  else
+    declare -a ENTRIES=($(find ${DIR} -maxdepth 1));
+    declare -a DIRS;
+    declare -i cnt=0;
+    declare e;
+    # Get ID of file system which / is associated with
+    declare -r FSID="$(stat -f --printf="%i" ${DIR})";
+
+    # Find all entries in / that are part of the same file system
+    for e in "${ENTRIES[@]}"; do
+      if [ "${e}" != "." ] && [ "${e}" != ".." ] && [ "${e}" != "${DIR}" ] && \
+	 [ "${FSID}" == "$(stat -f --printf="%i" ${e})" ]; then
+	DIRS[cnt]="${e}";
+        cnt=cnt+1;
+      fi
+    done
+
+    # Find all sym links except for the expected broken ones under the
+    # /dev/.udev area and a few specific (and expected broken links)
+    ${FIND} "${DIRS[@]}" -type l | /bin/grep -v "^/dev/.udev" | \
+      /bin/sed \
+        -e '/^\/lib\/modules\/.*\/build$/d' \
+        -e '/^\/lib\/modules\/.*\/source$/d';
+  fi
+}
+
+# Code
+# ====
+
+find_links ${root_dir} | while read l; do
+
+    if /usr/bin/file ${l} | /bin/grep -i "broken symbolic link" &> /dev/null; then
+      if [ "${IS_OK}" != "ok" ]; then
+        echo;
+        echo "*** Link: ${l} is unresolved ***";
+        ls -al --color ${l};
+        ((broken_link_cnt = broken_link_cnt + 1));
+      fi
+    fi
+
+  done && /bin/cat <<EOF
+
+=============================================
+*** Total count of unresolved links: ${broken_link_cnt}
+
+EOF
+
+# Exit OK if no broken links found
+if [ "${broken_link_cnt}" == "0" ]; then
+  exit 0
+else
+  exit 1;
+fi

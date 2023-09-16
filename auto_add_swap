@@ -1,0 +1,41 @@
+#!/usr/bin/bash
+#
+# $Id: auto_add_swap.cp,v 1.1 2009/02/17 19:11:44 pblankenbaker Exp $
+#
+#
+# Script: auto_add_swap ---rwh 2003
+#
+# This script will look for already defined swap space on
+# the current system and use it...
+
+#
+# Variables:
+# ==========
+
+
+#
+# Code:
+# =====
+echo
+echo "*** Swap space prior to adding..."
+echo "/sbin/swapon -s"
+/sbin/swapon -s
+
+echo
+echo "*** Detecting existing swap areas..."
+for s in $(/sbin/fdisk -l | /bin/awk -- '{ if ( $6 == "Linux" && $7 == "swap" ) print $1; }'); do
+  /sbin/swapon $s
+done
+
+if [ -z $s ]; then
+  echo
+  echo "*** No swap space detected..."
+else
+  echo
+  echo "*** Swap space after adding..."
+  echo "/sbin/swapon -s"
+  /sbin/swapon -s
+fi
+
+# terminate cleanly
+exit 0

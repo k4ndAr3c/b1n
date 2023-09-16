@@ -1,0 +1,30 @@
+#!/bin/bash
+
+airodump-ng-oui-update; echo
+update-oui
+sqlmap --update; echo
+#cd /SOfts/GITs/uniscan-code/ && perl uniscan.pl
+webhandler -up; echo
+WSFuzzer; echo
+icommander -u; echo
+rkhunter --update ;echo
+update-beef; echo
+fimap --update-def; echo
+nikto -update; echo
+openvas-nvt-sync --wget
+#cd /SOfts/PeNtEsT/Wifi_data/scripts/ && ./wiffy.sh -u; echo
+freshclam; echo
+uniscan
+#gem update; echo
+msfupdate
+joomscan update ; echo
+nmap --script-updatedb; echo
+wifite -upgrade; echo
+pullcves pull; echo
+wirouterkeyrec -u; echo
+wpscan --update; echo
+for i in $(find / -type d -name ".git" | awk 'sub("....$", "")') ; do cd $i ; echo "Updating "$i ; git pull ; echo ; done
+for i in $(find / -type d -name ".hg" | awk 'sub("...$", "")') ; do cd $i ; echo "Updating "$i ; hg pull && hg update ; echo ; done
+for i in $(find / -type d -name ".svn" | awk 'sub("....$", "")') ; do svn update $i ; echo ; done
+perl -MCPAN -e shell
+

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+files="${1}"
+g="${2}"
+opt="${3}"
+
+if [ -z "$files" ] ; then echo "Usage: $0 'file(s) file'" ; exit 1 ; fi
+if [ -z "$g" ] ; then
+	for f in $files ; do
+		echo "file: $f"
+		sleep 0.5
+		strings -e s $f
+		strings -e S $f
+		strings -e b $f
+		strings -e B $f
+		strings -e l $f
+		strings -e L $f
+	done
+else  
+	echo "greping $g with opts: $opt"
+	sleep 0.5
+	for f in $files ; do
+		echo "file: $f"
+		sleep 0.5
+		strings -e s $f |grep $opt $g
+		strings -e S $f |grep $opt $g
+		strings -e b $f |grep $opt $g
+		strings -e B $f |grep $opt $g
+		strings -e l $f |grep $opt $g
+		strings -e L $f |grep $opt $g
+	done
+fi
+	

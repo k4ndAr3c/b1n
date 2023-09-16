@@ -1,0 +1,375 @@
+#!/usr/bin/bash
+
+#
+# $Id: create_ramdisk.cp,v 1.1 2009/02/17 19:11:44 pblankenbaker Exp $
+
+#
+# Script: create_ramdisk ---rwh 2003, 2012
+#
+# This script will create a user specified size RAM Disk on dev: ${ramDev}
+# at mount point: ${ramMntDir}... 
+#
+
+
+#
+# Variables
+# =========
+ramDiskSize="";
+maxRamDiskSize=2097152;
+ramDev="";
+ramMntDir="";
+tmpStatus="";
+
+# verbose mode:         # on  - more verbose
+#                       # off - less verbose
+verbose_mode="off"
+
+
+# Functions:
+# ==========
+
+# print out info if verbose mode set
+#
+# pinfo "text"
+#
+# parameter: "text" - text to print out...
+#
+pinfo() {
+  if [ "${verbose_mode}" = "on" ]; then
+    echo "${1}";
+  fi
+}
+
+# usage...
+show_usage_header() {
+  cat <<EOF
+
+Usage: $(basename "$0") [-v] -s <size in MB> -d <RAM device> [-m <mount point>]
+                      [-mrds <size in KB>] [-h]
+
+EOF
+}
+
+show_usage_body() {
+  cat <<EOF
+   This script creates a user specified RAM disk of size: "-s <size in MB>" using RAM
+   device: "-d <RAM device>" at a default or user specified mount point
+   "[-m <mount point>]". The Kernel module: "brd.ko" will be loaded with a default
+   maximum RAM disk creation size of "2GB".
+
+  -s <size in MB> | --size <size in MB>
+     RAM disk size in Mega Bytes (MB).
+
+  -d <RAM device> | --ram-device <RAM device>
+     RAM device to use for this RAM disk. The allowed RAM devices one can use is in
+     the range: "/dev/ram1" - "/dev/ram15". NST will use the corresponding mount
+     point directories for the selected RAM device if no user mount point
+     "[-m <mount point>]" is specified:
+     /dev/ram1  => Mount point: /mnt/ram1
+     /dev/ram2  => Mount point: /mnt/ram2     /dev/ram3 =>  Mount point: /mnt/ram3
+     /dev/ram4  => Mount point: /mnt/ram4     /dev/ram5 =>  Mount point: /mnt/ram5
+     /dev/ram6  => Mount point: /mnt/ram6     /dev/ram7 =>  Mount point: /mnt/ram7
+     /dev/ram8  => Mount point: /mnt/ram8     /dev/ram9 =>  Mount point: /mnt/ram9
+     /dev/ram10 => Mount point: /mnt/ram10    /dev/ram11 => Mount point: /mnt/ram11
+     /dev/ram12 => Mount point: /mnt/ram12    /dev/ram13 => Mount point: /mnt/ram13
+     /dev/ram14 => Mount point: /mnt/ram14    /dev/ram15 => Mount point: /mnt/ram15
+
+  -m <mount point> | --mount-point <mount point>
+     Optional parameter to specify a mount point directory for the RAM device. If this
+     parameter is not used, then one of the above default mount points will be used.
+     Example: -m /data1
+
+  -mrds <size in KB> | --maximum-ram-disk-size <size in KB>
+     Optional parameter to specify the maximum size that one can used to create
+     a RAM disk. The default maximum RAM disk size is '2GB'. The value is specified
+     in KiloBytes (KB). This parameter will be passed to the 'brd.ko' Kernel
+     module using the 'modprobe' command.
+
+       Default value: modprobe brd rd_size=2097152
+
+  -v | --verbose
+     This optional switch will enable verbose output. Without this switch set, minimal
+     output from the execution of this script will be displayed.
+
+  -h | --help
+     Displays this help information.
+
+  **Notes: 1) If the mount point or the RAM device is already in use, this script will
+              exit and display a message indicating the reason for exiting.
+
+           2) If you unmount or detach the RAM device the Linux Kernel will not free
+              the allocated memory associated with the RAM device. This can be useful
+              if one wants to mount this device again: All data will be preserved. If
+              you need to free the memory back to the Kernel, one can use the "busybox"
+              command: "busybox freeramdisk <RAM device>". Use the "free" system memory
+              utility command to check your results.
+
+	   3) RAM device: "/dev/ram0" is not allowed it is reserved for system use.
+
+---------------------------------------------------------------------------------------
+Example 1: Create a 128MB RAM disk at mount point: "/mnt/ram6" ...
+
+# /root/bin/create_ramdisk -s 128 -d /dev/ram6
+
+Example 2: Unmount and free the memory associated with RAM device: "/dev/ram6" back to
+           the kernel...
+
+# free
+# umount /mnt/ram6
+# free
+# busybox freeramdisk /dev/ram6
+# free
+---------------------------------------------------------------------------------------
+
+EOF
+}
+
+show_usage() {
+  show_usage_header
+  show_usage_body
+}
+
+show_short_usage() {
+  show_usage_header
+  cat <<EOF
+--------------------------------------------------------------------------------------
+
+*** For more detailed help use: $(basename "$0") -h
+
+EOF
+}
+
+# makes sure a cmd line switch does not come before a value...
+error_if_switch() {
+
+  if [ "$(printf "%1.1s" ${1:--})" = "-" ]; then
+    echo "***ERROR*** '${1}' is not acceptable after ${2:-switch}"
+    show_short_usage
+    exit 1;
+  fi
+}
+
+#
+# Code
+# ====
+
+# process command line switches...
+while test $# -gt 0; do
+
+  opt="$1";
+  shift
+
+  case $opt in
+
+  -s | --size)
+     error_if_switch "$1" "$opt"
+     (( ramDiskSize = $1 * 1024 ))
+     shift
+     ;;
+
+  -d | --ram-device)
+     error_if_switch "$1" "$opt"
+     ramDev="$1"
+     shift
+     ;;
+
+  -m | --mount-point)
+     error_if_switch "$1" "$opt"
+     ramMntDir="$1"
+     shift
+     ;;
+
+  -mrds | --maximum-ram-disk-size)
+     error_if_switch "$1" "$opt";
+     maxRamDiskSize=${1};
+     shift;
+     ;;
+
+  -v | --verbose)
+     verbose_mode="on";                 # enable verbose mode...
+     ;;
+
+  -h | --help)
+     show_usage;
+     exit 0
+     ;;
+
+  *)
+     echo;
+     echo "***ERROR*** Command line argument: '$opt' is not valid for this script..."
+     show_short_usage;
+     exit 2;
+
+  esac
+done
+
+# check for a RAM disk size...
+if [ -z "${ramDiskSize}" ]; then
+  echo;
+  echo "***ERROR*** Need to specify a RAM Disk size: \"-s <size in MB>\"..."
+  show_short_usage;
+  exit 3;
+fi
+
+# check for a RAM device...
+if [ -z "${ramDev}" ]; then
+  echo;
+  echo "***ERROR*** Need to specify a RAM device: \"-d <RAM device>\"..."
+  show_short_usage;
+  exit 4;
+else
+
+# if a user mount was not specified, create a corresponding default one...
+  if [ -z ${ramMntDir} ]; then
+    ramMntDir=/mnt/$(/bin/basename ${ramDev})
+  fi
+fi
+
+# check for RAM device: "/dev/ram0" it is reserved for system use...
+if [ "${ramDev}" = "/dev/ram0" ]; then
+  echo;
+  echo "***ERROR*** RAM device: \"/dev/ram0\" is not allowed, it is reserved for system use...";
+  show_short_usage;
+  exit 9;
+fi
+
+# check for allowed RAM device range: /dev/ram1 - /dev/ram15
+if [ ! \( \( "${ramDev}" = "/dev/ram1" \) -o \
+ \( "${ramDev}" = "/dev/ram2" \) -o \( "${ramDev}" = "/dev/ram3" \) -o \
+ \( "${ramDev}" = "/dev/ram4" \) -o \( "${ramDev}" = "/dev/ram5" \) -o \
+ \( "${ramDev}" = "/dev/ram6" \) -o \( "${ramDev}" = "/dev/ram7" \) -o \
+ \( "${ramDev}" = "/dev/ram8" \) -o \( "${ramDev}" = "/dev/ram9" \) -o \
+ \( "${ramDev}" = "/dev/ram10" \) -o \( "${ramDev}" = "/dev/ram11" \) -o \
+ \( "${ramDev}" = "/dev/ram12" \) -o \( "${ramDev}" = "/dev/ram13" \) -o \
+ \( "${ramDev}" = "/dev/ram14" \) -o \( "${ramDev}" = "/dev/ram15" \) \) ]; then
+  echo;
+  echo "***ERROR*** RAM device: \"${ramDev}\" is not in the range: \"/dev/ram1\" - \"/dev/ram15\"...";
+  show_short_usage;
+  exit 11;
+fi
+
+#
+# Make sure the 'brd.ko' Kernel module is loaded...
+if ! /sbin/lsmod | /bin/grep -q '^brd'; then
+  pinfo;
+  pinfo "*** Loading Block RAM Device Driver Kernel Module: /sbin/modprobe brd rd_size=${maxRamDiskSize}";
+  if ! /sbin/modprobe brd rd_size=${maxRamDiskSize}; then
+    echo;
+    echo "***ERROR*** Could not load Block RAM Device Driver Kernel Module: \"brd.ko\"..."
+    echo;
+    exit 10;
+  fi
+else
+  pinfo;
+  pinfo "*** Block RAM Device Driver Kernel Module: \"brd.ko\" already loaded...";
+fi
+
+# check for an existing mount point...
+/bin/mount | /bin/grep -i ${ramMntDir} > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo;
+  echo "*** Mount point: \"${ramMntDir}\" is already in use, script: \"create_ramdisk\" is exiting normally..."
+  pinfo
+  tmpStatus=$(/bin/mount | /bin/grep -i ${ramMntDir})
+  pinfo "*** (mount):"
+  pinfo "${tmpStatus}"
+  pinfo
+  pinfo "*** (df -k):"
+  if [ "${verbose_mode}" = "on" ]; then
+    /bin/df -k
+  fi
+  echo;
+  exit 0;
+fi
+
+# check for existing RAM device usage...
+/bin/mount | /bin/grep -i ${ramDev} > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+  echo;
+  echo "*** A RAM disk for device: \"${ramDev}\" already exists, script: \"create_ramdisk\" is exiting normally..."
+  pinfo
+  tmpStatus=$(/bin/mount | /bin/grep -i ${ramDev})
+  pinfo "*** (mount):"
+  pinfo "${tmpStatus}"
+  pinfo
+  pinfo "*** (df -k):"
+  if [ "${verbose_mode}" = "on" ]; then
+    /bin/df -k
+  fi
+  echo;
+  exit 0;
+fi
+
+pinfo
+pinfo "============================================================"
+pinfo "= Creating a ${ramDiskSize}KB RAM disk at mount point: ${ramMntDir}... ="
+pinfo "============================================================"
+pinfo
+
+# zeroing out ram device: ${ramDev}
+pinfo "*** Zeroing out RAM device: \"${ramDev}\"..."
+zeroRAMDev="/bin/dd if=/dev/zero of=${ramDev} bs=1k count=${ramDiskSize}"
+if [ "${verbose_mode}" = "off" ]; then
+  zeroRAMDev="${zeroRAMDev} > /dev/null 2>&1"
+fi
+pinfo "${zeroRAMDev}"
+if (! eval ${zeroRAMDev}); then
+  echo;
+  echo "***ERROR*** Could not zero out RAM device: \"${ramDev}\"..."
+  echo;
+  exit 5;
+fi
+
+# create an ext2 file system on the ram device: ${ramDev}
+pinfo
+pinfo "*** Creating a ${ramDiskSize}KB Linux ext2 file system on RAM device: \"${ramDev}\"..."
+makeExt2FS="/sbin/mke2fs -vm 0 ${ramDev} ${ramDiskSize}"
+if [ "${verbose_mode}" = "off" ]; then
+  makeExt2FS="${makeExt2FS} > /dev/null 2>&1"
+fi
+pinfo "${makeExt2FS}"
+if (! eval ${makeExt2FS}); then
+  echo;
+  echo "***ERROR*** Could not create an ext2 file system on RAM Device: \"${ramDev}\"..."
+  echo;
+  exit 6;
+fi
+
+# mount the ram device: ${ramDev} at mount point ${ramMntDir}...
+# - make sure mount point exists...
+if [ ! -d ${ramMntDir} ]; then
+  pinfo
+  pinfo "*** Creating RAM disk mount point: \"${ramMntDir}\"..."
+  /bin/mkdir -p ${ramMntDir}
+fi
+
+# mount ram disk to mount point...
+pinfo
+pinfo "*** Mounting RAM disk device: \"${ramDev}\" at mount point: \"${ramMntDir}\"..."
+mountFS="/bin/mount -t ext2 ${ramDev} ${ramMntDir}"
+if [ "${verbose_mode}" = "off" ]; then
+  mountFS="${mountFS} > /dev/null 2>&1"
+fi
+pinfo "${mountFS}"
+if (! eval ${mountFS}); then
+  echo;
+  echo "***ERROR*** Could not mount RAM device: \"${ramDev}\" at mount point: \"${ramMntDir}\"..."
+  echo;
+  exit 7;
+fi
+
+# show all mounts...
+pinfo
+pinfo "*** Show all current mounts..."
+pinfo "/bin/df -k"
+if [ "${verbose_mode}" = "on" ]; then
+  /bin/df -k
+fi
+
+# display for both verbose/non-verbose modes...
+echo;
+echo "*** Successfully created a ${ramDiskSize}KB RAM Disk: \"${ramDev}\" at mount point: \"${ramMntDir}\"..."
+echo;
+
+# terminate cleanly...
+exit 0;
