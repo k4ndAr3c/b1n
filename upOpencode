@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+new=$(curl -s https://github.com/sst/opencode/releases/ |grep 'github.com/sst/opencode/releases/expanded_assets' |cut -d'"' -f 4 |head -n1 |sed 's/expanded_assets/download/')
+wget "$new/opencode-linux-x64.tar.gz" -O /tmp/opencode-linux-x64.tar.gz && tar xvzf /tmp/opencode-linux-x64.tar.gz -C ~/bin/ && chmod +x ~/bin/opencode
+echo -e "\033[92m[+] Updated to $(echo $new | awk -F/ '{print $NF}')\033[0m."

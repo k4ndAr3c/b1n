@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+new=$(curl -s https://github.com/google-gemini/gemini-cli/releases |grep 'github.com/google-gemini/gemini-cli/releases/expanded_assets/' |cut -d'"' -f 6 |head -n1 |sed 's/expanded_assets/download/')
+wget "$new/gemini.js" -O ~/bin/gemini.js && chmod +x ~/bin/gemini.js
+echo -e "\033[92m[+] Updated to $(echo $new | awk -F/ '{print $NF}')\033[0m."
