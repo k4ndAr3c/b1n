@@ -1,5 +1,7 @@
 #!/bin/bash
 
+curl -s "https://api.proxynova.com/v1/geolocation/bulk?ip=$1" | jq
+echo
 ripdc.sh -t $1
 echo "-----------------"
 curl -s "http://ipinfo.io/$1"
