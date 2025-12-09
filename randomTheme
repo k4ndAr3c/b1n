@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+bat_themes=("1337" "base16-256" "DarkNeon" "gruvbox-dark" "Monokai Extended Bright" "Nord" "Solarized (dark)" "TwoDark" "ansi" "Coldark-Cold" "Dracula" "gruvbox-light" "Monokai Extended Light" "OneHalfDark" "Solarized (light)" "Visual Studio Dark+" "base16" "Coldark-Dark" "GitHub" "Monokai Extended" "Monokai Extended Origin" "OneHalfLight" "Sublime Snazzy" "zenburn")
+
+http_themes=(abap algol algol_nu arduino auto autumn borland bw	coffee colorful default dracula emacs friendly friendly_grayscale fruity github-dark gruvbox-dark gruvbox-light igor inkpot lightbulb lilypond lovelace	manni material monokai murphy native nord nord-darker one-dark paraiso-dark paraiso-light pastie perldoc pie pie-dark pie-light rainbow_dash rrt sas solarized solarized-dark solarized-light staroffice stata-dark	stata-light tango trac vim vs xcode zenburn)
+
+case $1 in
+	bat)
+		random_index=$(( RANDOM % ${#bat_themes[@]} ))
+		random_theme=${bat_themes[$random_index]}
+		;;
+	http)
+		random_index=$(( RANDOM % ${#http_themes[@]} ))
+		random_theme=${http_themes[$random_index]}
+		;;
+	*) random_theme="gruvbox-dark" ;;
+esac
+
+echo -n $random_theme
