@@ -3,5 +3,5 @@ new=$(curl -s https://github.com/mistralai/mistral-vibe/releases |grep 'github.c
 ver=$(echo "$new" | awk -F/ '{print $NF}')
 name=$(echo "$ver" | sed 's/v/vibe-acp-linux-x86_64-/')
 echo -e "\033[92m[^] Downloading ${name}.zip\033[0m"
-wget "$new/${name}.zip" -O /tmp/vibe-acp-linux-x64.zip && unzip /tmp/vibe-acp-linux-x64.zip -d ~/bin/ -f && chmod +x ~/bin/vibe-acp
+wget "$new/${name}.zip" -O /tmp/vibe-acp-linux-x64.zip && unzip -d ~/bin/ -o /tmp/vibe-acp-linux-x64.zip && chmod +x ~/bin/vibe-acp
 echo -e "\033[92m[+] Updated to $ver\033[0m."
