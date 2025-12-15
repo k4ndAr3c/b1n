@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+new=$(curl -s https://github.com/github/copilot-cli/releases |grep 'github.com/github/copilot-cli/releases/expanded_assets/' |cut -d'"' -f 6 |head -n1 |sed 's/expanded_assets/download/')
+wget "$new/copilot-linux-x64.tar.gz" -O /tmp/copilot-linux-x64.tar.gz && tar xvzf /tmp/copilot-linux-x64.tar.gz -C ~/bin/ && chmod +x ~/bin/copilot
+echo -e "\033[92m[+] Updated to $(echo $new | awk -F/ '{print $NF}')\033[0m."
