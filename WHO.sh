@@ -8,9 +8,10 @@ if [[ -d ~/ip-blacklist-main ]] ; then
 		echo "BLACKLISTED IP: $blip"
 	fi
 fi
+echo "-----------------"
 curl -s "https://api.proxynova.com/v1/geolocation/bulk?ip=$1" | jq
 echo "-----------------"
-curl -s "https://api.hackertarget.com/reverseiplookup/?q=$1" | column -c "$(tput cols)" -x
+~/bin/scrape_rapiddns.py $1 || curl -s "https://api.hackertarget.com/reverseiplookup/?q=$1" | column -c "$(tput cols)" -x
 echo "-----------------"
 rDNS -t $1
 echo "-----------------"
