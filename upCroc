@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+new=$(curl -s https://github.com/schollz/croc/releases/ |grep 'github.com/schollz/croc/releases/expanded_assets' |cut -d'"' -f 4 |head -n1 |sed 's/expanded_assets/download/')
+file="croc_${new##*/}_Linux-64bit.tar.gz"
+wget "$new/$file" -O /tmp/croc-linux-x64.tar.gz && tar xvzf /tmp/croc-linux-x64.tar.gz -C /usr/local/bin/ && chmod +x /usr/local/bin/croc ; rm /usr/local/bin/LICENSE
+echo -e "\033[92m[+] Updated to $(echo $new | awk -F/ '{print $NF}')\033[0m."
