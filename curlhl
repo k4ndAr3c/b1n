@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+if [[ ! -f /usr/bin/grcat ]] ; then echo "grcat not installed :(" ; exit 1 ; fi
+
+hl () {
+        [[ -n $1 ]] && {
+                /usr/bin/bat --color always -pp -l "$@"
+                return
+        }
+        /usr/bin/bat --color always -pp
+}
+
+curlhl () {
+	local suffix="$1"
+	local opts=()
+	shift 1
+	opts=("--proto-default" "https")
+	[[ "$*" == *".onion"* ]] && [ -z "$http_proxy" ] && opts=("--socks5-hostname" "${TOR}")
+	[ -t 2 ] && {
+		if [ -t 1 ]
+		then
+			{
+				"/usr/bin/curl" ${suffix} "${opts[@]}" -s "$@" 2>&1 >&- >&3 3>&- | /usr/bin/grcat conf.curl
+			} 3>&- 3>&1 >&- >&2 | hl
+		else
+			{
+				"/usr/bin/curl" ${suffix} "${opts[@]}" -s "$@" 2>&1 >&- >&3 3>&- | /usr/bin/grcat conf.curl
+			} 3>&- 3>&1 >&- >&2
+		fi
+		return
+	}
+	[ ! -t 1 ] && {
+		"/usr/bin/curl" ${suffix} "${opts[@]}" "$@"
+		return
+	}
+	"/usr/bin/curl" ${suffix} "${opts[@]}" -s "$@" | hl
+}
+
+curlhl "$@"
