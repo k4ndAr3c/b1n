@@ -2,12 +2,15 @@
 
 if [[ ! -f /usr/bin/grcat ]] ; then echo "grcat not installed :(" ; exit 1 ; fi
 
+bat="/usr/bin/bat"
+if [[ ! -f "$bat" ]] ; then bat="/usr/bin/batcat" ; fi
+
 hl () {
         [[ -n $1 ]] && {
-                /usr/bin/bat --color always -pp -l "$@"
+                $bat --color always -pp -l "$@"
                 return
         }
-        /usr/bin/bat --color always -pp
+        $bat --color always -pp
 }
 
 curlhl () {
